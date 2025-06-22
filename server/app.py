@@ -1,21 +1,23 @@
 from flask import Flask
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from config import Config
 
-db = SQLAlchemy()
+from models import db, User, Skill, SkillRequest  # ✅ use shared db from models
+
 migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    db.init_app(app)
-    migrate.init_app(app, db)
+    db.init_app(app)              
+    migrate.init_app(app, db)     
     CORS(app)
 
-    from models import User, Skill, SkillRequest
+    @app.route('/users')
+    def get_users():
+        return [user.to_dict() for user in User.query.all()]
 
     @app.route('/')
     def home():
