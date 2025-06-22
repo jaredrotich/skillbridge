@@ -2,6 +2,9 @@ from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
 from config import Config
+from routes.skills import skills_bp
+from routes.users import users_bp
+from routes.requests import requests_bp
 
 from models import db, User, Skill, SkillRequest  # ✅ use shared db from models
 
@@ -14,6 +17,10 @@ def create_app():
     db.init_app(app)              
     migrate.init_app(app, db)     
     CORS(app)
+
+    app.register_blueprint(skills_bp)
+    app.register_blueprint(users_bp)
+    app.register_blueprint(requests_bp)
 
     @app.route('/users')
     def get_users():
