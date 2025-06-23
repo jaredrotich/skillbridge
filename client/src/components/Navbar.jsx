@@ -18,6 +18,7 @@ function Navbar({ user, setUser }) {
       <Link to="/">Skills</Link>
       <Link to="/new">Post Skill</Link>
       <Link to="/requests">Requests</Link>
+      {/* <Link to="/RequestSkill">RequestSkill</Link> */}
       {user ? (
         <>
           <span style={{ color: "white", marginLeft: "1rem" }}>

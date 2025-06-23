@@ -57,3 +57,28 @@ def update_status(id):
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 400
+    
+@requests_bp.route("/", methods=["POST"])
+def create_request():
+    data = request.get_json()
+    user_id = session.get("user_id")
+    
+    if not user_id:
+        return {"error": "Unauthorized"}, 401
+
+    skill_id = data.get("skill_id")
+    message = data.get("message")
+
+    try:
+        new_request = SkillRequest(
+            requester_id=user_id,
+            skill_id=skill_id,
+            message=message
+        )
+        db.session.add(new_request)
+        db.session.commit()
+        return new_request.to_dict(), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return {"error": f"Failed to create request: {str(e)}"}, 500

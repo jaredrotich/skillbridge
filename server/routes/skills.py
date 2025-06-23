@@ -11,6 +11,15 @@ def get_skills():
     skills = Skill.query.all()
     return jsonify([s.to_dict() for s in skills]), 200
 
+@skills_bp.route("/<int:id>", methods=["GET"])
+def get_skill(id):
+    skill = Skill.query.get(id)
+    if not skill:
+        return {"error": "Skill not found"}, 404
+    return skill.to_dict(), 200
+
+
+
 
 # CREATE new skill
 
@@ -67,3 +76,4 @@ def delete_skill(id):
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 400
+    

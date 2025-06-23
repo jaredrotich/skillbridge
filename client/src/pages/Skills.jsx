@@ -1,29 +1,41 @@
 import React, { useEffect, useState } from "react";
-import SkillCard from "../components/SkillCard";
+import SkillCard from "../components/SkillCard"; 
 
 function Skills() {
   const [skills, setSkills] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch("http://localhost:5000/skills/", {
-      credentials: "include", // Needed for session-aware fetching
+      credentials: "include",
     })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("Failed to fetch skills");
+        return r.json();
+      })
       .then((data) => {
-        console.log("Skills fetched:", data); 
         setSkills(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching skills:", err);
+        setError("Could not load skills. Try again later.");
+        setLoading(false);
       });
   }, []);
 
   return (
     <div className="container">
       <h2>Available Skills</h2>
+
+      {loading && <p>Loading skills...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {skills.length === 0 && !loading && !error && <p>No skills available yet.</p>}
+
       {skills.map((skill) => (
-        <div className="card" key={skill.id}>
-          <h3>{skill.title}</h3>
-          <p>{skill.description}</p>
-          <p><strong>Offered by:</strong> {skill.user ? skill.user.username : "Unknown User"}</p>
-        </div>
+        <SkillCard key={skill.id} skill={skill} />
       ))}
     </div>
   );

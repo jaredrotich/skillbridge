@@ -1,30 +1,49 @@
 .skill-card {
-  background-color: #fff;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease-in-out;
 }
 
 .skill-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
 }
 
-.skill-title {
-  margin: 0 0 0.5rem;
+.skill-card-header h3 {
   font-size: 1.25rem;
-  font-weight: 600;
-  color: #1a202c;
+  margin-bottom: 4px;
 }
 
-.skill-desc {
-  margin-bottom: 0.75rem;
-  color: #4a5568;
-}
-
-.skill-offered {
+.skill-username {
   font-size: 0.95rem;
-  color: #2d3748;
+  color: #555;
+}
+
+.skill-description {
+  margin: 10px 0 15px;
+  color: #333;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.skill-card-actions {
+  text-align: right;
+}
+
+.request-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.request-btn:hover {
+  background-color: #0056b3;
 }

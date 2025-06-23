@@ -6,6 +6,8 @@ import NewSkill from "./pages/NewSkill";
 import Requests from "./pages/Requests";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import RequestSkill from "./pages/RequestSkill";
+
 
 function App() {
   const [user, setUser] = useState(null);
@@ -28,6 +30,7 @@ function App() {
         <Route path="/requests" element={<Requests />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/signup" element={<Signup setUser={setUser} />} />
+        <Route path="/request-skill/:id" element={<RequestSkill user={user} />} />
       </Routes>
     </Router>
   );
