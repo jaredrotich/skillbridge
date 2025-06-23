@@ -7,6 +7,9 @@ function Navbar() {
       <Link to="/" style={{ marginRight: "1rem", color: "#fff" }}>Skills</Link>
       <Link to="/new" style={{ marginRight: "1rem", color: "#fff" }}>Post Skill</Link>
       <Link to="/requests" style={{ color: "#fff" }}>Requests</Link>
+      <Link to="/login" style={{ color: "#fff", marginRight: "1rem" }}>Login</Link>
+      <Link to="/signup" style={{ color: "#fff" }}>Signup</Link>
+
     </nav>
   );
 }
