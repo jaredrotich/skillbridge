@@ -1,25 +1,10 @@
-import React from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
+import React from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { useNavigate } from "react-router-dom";
 
-function Login() {
-  const handleLogin = (values, { resetForm }) => {
-    fetch("http://localhost:5000/users/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(values)
-    })
-      .then(res => {
-        if (!res.ok) throw new Error("Invalid credentials");
-        return res.json();
-      })
-      .then(data => {
-        alert(`Welcome back, ${data.username}!`);
-        resetForm();
-      })
-      .catch(err => alert(err.message));
-  };
+function Login({ setUser }) {
+  const navigate = useNavigate();
 
   return (
     <div className="container">
@@ -30,20 +15,36 @@ function Login() {
           username: Yup.string().required("Required"),
           password: Yup.string().required("Required"),
         })}
-        onSubmit={handleLogin}
+        onSubmit={(values, { setSubmitting, setErrors }) => {
+          fetch("http://localhost:5000/users/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(values),
+          }).then((r) => {
+            setSubmitting(false);
+            if (r.ok) {
+              r.json().then((user) => {
+                setUser(user);
+                navigate("/");
+              });
+            } else {
+              setErrors({ password: "Invalid username or password" });
+            }
+          });
+        }}
       >
-        <Form className="card">
+        <Form>
           <div>
-            <label>Username</label><br />
+            <label>Username:</label>
             <Field name="username" />
             <ErrorMessage name="username" component="div" />
           </div>
           <div>
-            <label>Password</label><br />
-            <Field type="password" name="password" />
+            <label>Password:</label>
+            <Field name="password" type="password" />
             <ErrorMessage name="password" component="div" />
           </div>
-          <button type="submit">Log In</button>
+          <button type="submit">Login</button>
         </Form>
       </Formik>
     </div>

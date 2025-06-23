@@ -6,7 +6,7 @@ from routes.skills import skills_bp
 from routes.users import users_bp
 from routes.requests import requests_bp
 
-from models import db, User, Skill, SkillRequest  # ✅ use shared db from models
+from models import db, User, Skill, SkillRequest
 
 migrate = Migrate()
 
@@ -14,9 +14,11 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    db.init_app(app)              
-    migrate.init_app(app, db)     
-    CORS(app)
+    db.init_app(app)
+    migrate.init_app(app, db)
+
+    #  Enable credentials for sessions!
+    CORS(app, supports_credentials=True)
 
     app.register_blueprint(skills_bp)
     app.register_blueprint(users_bp)
