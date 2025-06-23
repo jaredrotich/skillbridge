@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import SkillCard from "../components/SkillCard";
 
 function Skills() {
   const [skills, setSkills] = useState([]);
