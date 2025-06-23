@@ -11,11 +11,13 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False, unique=True)
     password_hash = db.Column(db.String, nullable=False)
 
-    skills = db.relationship('Skill', backref='user', cascade="all, delete")
+    # Relationships
+    skills = db.relationship('Skill', backref='user', cascade="all, delete-orphan")
     requests_made = db.relationship(
-        'SkillRequest', 
-        backref='requester', 
-        foreign_keys='SkillRequest.requester_id'
+        'SkillRequest',
+        backref='requester',
+        foreign_keys='SkillRequest.requester_id',
+        cascade="all, delete-orphan"
     )
 
     def to_dict(self):
@@ -38,16 +40,16 @@ class Skill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-    requests = db.relationship('SkillRequest', backref='skill', cascade="all, delete")
+    # Reverse relationship
+    requests = db.relationship('SkillRequest', backref='skill', cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
             "id": self.id,
             "title": self.title,
             "description": self.description,
-            #  Safe check added to avoid NoneType error
             "user": self.user.to_dict() if self.user else None
         }
 
@@ -56,15 +58,14 @@ class SkillRequest(db.Model):
     __tablename__ = 'skill_requests'
 
     id = db.Column(db.Integer, primary_key=True)
-    requester_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    skill_id = db.Column(db.Integer, db.ForeignKey('skills.id'))
-    status = db.Column(db.String(20), default="pending") 
+    requester_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    skill_id = db.Column(db.Integer, db.ForeignKey('skills.id'), nullable=False)
+    status = db.Column(db.String(20), default="pending")
     message = db.Column(db.String(255))
 
     def to_dict(self):
         return {
             "id": self.id,
-            #  Avoid crashes if any foreign key is missing
             "requester": self.requester.to_dict() if self.requester else None,
             "skill": self.skill.to_dict() if self.skill else None,
             "status": self.status,
@@ -73,6 +74,6 @@ class SkillRequest(db.Model):
 
     @validates('message')
     def validate_message(self, key, message):
-        if len(message) > 255:
+        if message and len(message) > 255:
             raise ValueError("Message must be under 255 characters")
         return message

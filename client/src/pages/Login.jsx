@@ -3,6 +3,8 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+
 function Login({ setUser }) {
   const navigate = useNavigate();
 
@@ -12,25 +14,29 @@ function Login({ setUser }) {
       <Formik
         initialValues={{ username: "", password: "" }}
         validationSchema={Yup.object({
-          username: Yup.string().required("Required"),
-          password: Yup.string().required("Required"),
+          username: Yup.string().required("Username is required"),
+          password: Yup.string().required("Password is required"),
         })}
         onSubmit={(values, { setSubmitting, setErrors }) => {
-          fetch("http://localhost:5000/users/login", {
+          fetch(`${API_BASE}/users/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: "include", 
             body: JSON.stringify(values),
-          }).then((r) => {
-            setSubmitting(false);
-            if (r.ok) {
-              r.json().then((user) => {
+          })
+            .then(async (res) => {
+              setSubmitting(false);
+              if (res.ok) {
+                const user = await res.json();
                 setUser(user);
                 navigate("/");
-              });
-            } else {
-              setErrors({ password: "Invalid username or password" });
-            }
-          });
+              } else {
+                setErrors({ password: "Invalid username or password" });
+              }
+            })
+            .catch(() =>
+              setErrors({ password: "Server error. Try again later." })
+            );
         }}
       >
         <Form>
@@ -39,11 +45,13 @@ function Login({ setUser }) {
             <Field name="username" />
             <ErrorMessage name="username" component="div" />
           </div>
+
           <div>
             <label>Password:</label>
             <Field name="password" type="password" />
             <ErrorMessage name="password" component="div" />
           </div>
+
           <button type="submit">Login</button>
         </Form>
       </Formik>
