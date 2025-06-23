@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import validates
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
+from flask import current_app
 
 db = SQLAlchemy()
 
@@ -26,6 +28,19 @@ class User(db.Model):
             "username": self.username,
             "email": self.email
         }
+
+    def generate_reset_token(self, expires_sec=1800):
+        s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
+        return s.dumps(self.id)
+
+    @staticmethod
+    def verify_reset_token(token, expires_sec=1800):
+        s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
+        try:
+            user_id = s.loads(token, max_age=expires_sec)
+        except (BadSignature, SignatureExpired):
+            return None
+        return User.query.get(user_id)
 
     @validates('email')
     def validate_email(self, key, email):

@@ -7,6 +7,8 @@ import Requests from "./pages/Requests";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import RequestSkill from "./pages/RequestSkill";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 
 function App() {
@@ -31,6 +33,9 @@ function App() {
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/signup" element={<Signup setUser={setUser} />} />
         <Route path="/request-skill/:id" element={<RequestSkill user={user} />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+
       </Routes>
     </Router>
   );

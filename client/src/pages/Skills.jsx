@@ -33,10 +33,11 @@ function Skills() {
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       {skills.length === 0 && !loading && !error && <p>No skills available yet.</p>}
-
+     <div className="skill-grid">
       {skills.map((skill) => (
         <SkillCard key={skill.id} skill={skill} />
       ))}
+      </div>
     </div>
   );
 }
