@@ -15,28 +15,32 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    #  secret key for session management
+    app.secret_key = "!<POTUS>"  #  enables Flask session usage
+
+    #  Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
 
-    #  Enable CORS with credentials (for session cookies to work!)
+    #  Enable CORS with credentials (important for session cookies)
     CORS(app, supports_credentials=True)
 
-    #  Register the blueprints
+    #  Register blueprints
     app.register_blueprint(skills_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(requests_bp)
 
-    #  Routes for testing
+    #  Test route for users
     @app.route('/users')
     def get_users():
         return jsonify([user.to_dict() for user in User.query.all()])
 
+    #  Root route
     @app.route('/')
     def home():
         return {"message": "Welcome to SkillBridge API 🎉"}
 
     return app
-
 
 if __name__ == '__main__':
     app = create_app()

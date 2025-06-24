@@ -1,7 +1,6 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-
 function Navbar({ user, setUser }) {
   const navigate = useNavigate();
 
@@ -20,6 +19,13 @@ function Navbar({ user, setUser }) {
       <Link to="/">Skills</Link>
       <Link to="/new">Post Skill</Link>
       <Link to="/requests">Requests</Link>
+
+      {/*  Only show if user is logged in and is admin */}
+      {user?.username === "admin" && (
+        <Link to="/userslist" style={{ marginLeft: "1rem" }}>
+          Manage Users
+        </Link>
+      )}
 
       {user ? (
         <>

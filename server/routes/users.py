@@ -7,13 +7,25 @@ from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 users_bp = Blueprint("users", __name__, url_prefix="/users")
 
 # -------------------------
-# GET All Users
+# HELPER: Admin Check
+# -------------------------
+def is_admin():
+    user_id = session.get("user_id")
+    if not user_id:
+        return False
+    user = User.query.get(user_id)
+    return user and user.is_admin
+
+# -------------------------
+# GET All Users (Admin Only)
 # -------------------------
 @users_bp.route("/", methods=["GET"])
 def get_users():
+    if not is_admin():
+        return {"error": "Unauthorized"}, 403
+
     users = User.query.all()
     return jsonify([user.to_dict() for user in users]), 200
-
 
 # -------------------------
 # LOGIN
@@ -28,7 +40,6 @@ def login():
         return user.to_dict(), 200
 
     return {"error": "Invalid credentials"}, 401
-
 
 # -------------------------
 # SIGNUP
@@ -60,7 +71,6 @@ def signup():
         print(f"[SIGNUP ERROR] {str(e)}")
         return {"error": f"Signup failed. Reason: {str(e)}"}, 500
 
-
 # -------------------------
 # CHECK SESSION
 # -------------------------
@@ -73,7 +83,6 @@ def check_session():
             return user.to_dict(), 200
     return {"error": "Unauthorized"}, 401
 
-
 # -------------------------
 # LOGOUT
 # -------------------------
@@ -82,14 +91,12 @@ def logout():
     session.pop("user_id", None)
     return {"message": "Logged out successfully"}, 200
 
-
 # -------------------------
-# HELPER: Generate Token
+# HELPER: Generate & Verify Token
 # -------------------------
 def generate_reset_token(email):
     s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
     return s.dumps(email, salt="password-reset")
-
 
 def verify_reset_token(token, expiration=3600):
     s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
@@ -98,7 +105,6 @@ def verify_reset_token(token, expiration=3600):
         return User.query.filter_by(email=email).first()
     except (BadSignature, SignatureExpired):
         return None
-
 
 # -------------------------
 # FORGOT PASSWORD
@@ -114,10 +120,9 @@ def forgot_password():
 
     token = generate_reset_token(email)
     reset_link = f"http://localhost:3000/reset-password/{token}"
-    print(f"[RESET LINK] {reset_link}")  # In production, send via email
+    print(f"[RESET LINK] {reset_link}")  # TODO: Send this via email in production
 
     return {"message": "Reset link generated", "reset_link": reset_link}, 200
-
 
 # -------------------------
 # RESET PASSWORD
@@ -137,3 +142,37 @@ def reset_password(token):
     user.password_hash = generate_password_hash(new_password)
     db.session.commit()
     return {"message": "Password has been reset"}, 200
+
+# -------------------------
+# UPDATE USER
+# -------------------------
+@users_bp.route("/<int:id>", methods=["PATCH"])
+def update_user(id):
+    user = User.query.get_or_404(id)
+    data = request.get_json()
+
+    user.username = data.get("username", user.username)
+    user.email = data.get("email", user.email)
+
+    if "password" in data:
+        user.password_hash = generate_password_hash(data["password"])
+
+    try:
+        db.session.commit()
+        return user.to_dict(), 200
+    except Exception as e:
+        db.session.rollback()
+        return {"error": str(e)}, 400
+
+# -------------------------
+# DELETE USER (Admin Only)
+# -------------------------
+@users_bp.route("/<int:id>", methods=["DELETE"])
+def delete_user(id):
+    if not is_admin():
+        return {"error": "Unauthorized. Admins only."}, 403
+
+    user = User.query.get_or_404(id)
+    db.session.delete(user)
+    db.session.commit()
+    return {"message": "User deleted"}, 200

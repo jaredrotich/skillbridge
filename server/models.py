@@ -12,6 +12,7 @@ class User(db.Model):
     username = db.Column(db.String(50), nullable=False, unique=True)
     email = db.Column(db.String(100), nullable=False, unique=True)
     password_hash = db.Column(db.String, nullable=False)
+    is_admin = db.Column(db.Boolean, default=False) 
 
     # Relationships
     skills = db.relationship('Skill', backref='user', cascade="all, delete-orphan")
@@ -26,7 +27,8 @@ class User(db.Model):
         return {
             "id": self.id,
             "username": self.username,
-            "email": self.email
+            "email": self.email,
+            "is_admin": self.is_admin 
         }
 
     def generate_reset_token(self, expires_sec=1800):
@@ -77,6 +79,7 @@ class SkillRequest(db.Model):
     skill_id = db.Column(db.Integer, db.ForeignKey('skills.id'), nullable=False)
     status = db.Column(db.String(20), default="pending")
     message = db.Column(db.String(255))
+    feedback = db.Column(db.String(255)) 
 
     def to_dict(self):
         return {
