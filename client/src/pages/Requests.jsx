@@ -12,20 +12,21 @@ function Requests() {
       .then(setRequests);
   }, []);
 
-  const handleComplete = (id) => {
+  const handleUpdate = (id, status, feedback) => {
     fetch(`http://localhost:5000/requests/${id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       credentials: "include",
-      body: JSON.stringify({ status: "completed" }),
+      body: JSON.stringify({ status, feedback }),
     })
       .then((r) => r.json())
       .then((updated) => {
         setRequests((prev) =>
-          prev.map((req) => (req.id === updated.id ? updated : req))
+          prev.map((req) => (req.id === id ? updated : req))
         );
-      })
-      .catch((err) => console.error("Error completing request:", err));
+      });
   };
 
   return (
@@ -37,16 +38,28 @@ function Requests() {
       ) : (
         requests.map((r) => (
           <div className="request-card" key={r.id}>
-            <p><strong>Skill:</strong> {r.skill ? r.skill.title : "Unknown Skill"}</p>
-            <p><strong>From:</strong> {r.requester ? r.requester.username : "Unknown User"}</p>
+            <p><strong>Skill:</strong> {r.skill?.title}</p>
+            <p><strong>From:</strong> {r.requester?.username}</p>
             <p><strong>Message:</strong> {r.message}</p>
-            <p><strong>Status:</strong> {r.status}</p>
 
-            {r.status !== "completed" && (
-              <button className="complete-btn" onClick={() => handleComplete(r.id)}>
-                Mark as Complete
-              </button>
-            )}
+            <label><strong>Status:</strong></label>
+            <select
+              value={r.status}
+              onChange={(e) => handleUpdate(r.id, e.target.value, r.feedback || "")}
+            >
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+
+            <label><strong>Feedback:</strong></label>
+            <textarea
+              rows="3"
+              value={r.feedback || ""}
+              onChange={(e) => handleUpdate(r.id, r.status, e.target.value)}
+              placeholder="Leave feedback..."
+            />
+
           </div>
         ))
       )}

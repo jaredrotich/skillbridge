@@ -84,7 +84,8 @@ class SkillRequest(db.Model):
             "requester": self.requester.to_dict() if self.requester else None,
             "skill": self.skill.to_dict() if self.skill else None,
             "status": self.status,
-            "message": self.message
+            "message": self.message,
+            "feedback": self.feedback
         }
 
     @validates('message')

@@ -44,20 +44,19 @@ def create_request():
 
 # PATCH (update status)
 @requests_bp.route("/<int:id>", methods=["PATCH"])
-def update_request(id):
+def update_request_status(id):
+    request_obj = SkillRequest.query.get_or_404(id)
     data = request.get_json()
-    req = SkillRequest.query.get(id)
 
-    if not req:
-        return {"error": "Request not found"}, 404
-
+    # Allow updates to status and feedback
     if "status" in data:
-        req.status = data["status"]
+        request_obj.status = data["status"]
+    if "feedback" in data:
+        request_obj.feedback = data["feedback"]
 
     try:
         db.session.commit()
-        return req.to_dict(), 200
+        return request_obj.to_dict(), 200
     except Exception as e:
         db.session.rollback()
-        print(f"[REQUEST UPDATE ERROR] {e}")
-        return {"error": "Failed to update request"}, 500
+        return {"error": str(e)}, 400
