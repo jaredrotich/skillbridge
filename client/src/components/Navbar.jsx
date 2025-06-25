@@ -19,6 +19,7 @@ function Navbar({ user, setUser }) {
       <Link to="/">Skills</Link>
       <Link to="/new">Post Skill</Link>
       <Link to="/requests">Requests</Link>
+      <Link to="/clientrequest">ClientRequest</Link>
 
       {/*  Only show if user is logged in and is admin */}
       {user?.username === "admin" && (

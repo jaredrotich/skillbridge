@@ -148,21 +148,38 @@ def reset_password(token):
 # -------------------------
 @users_bp.route("/<int:id>", methods=["PATCH"])
 def update_user(id):
+    # Only admins can update any user
+    if not is_admin():
+        return {"error": "Unauthorized. Admins only."}, 403
+
     user = User.query.get_or_404(id)
     data = request.get_json()
 
-    user.username = data.get("username", user.username)
-    user.email = data.get("email", user.email)
+    #  username, email, password, is_admin
+    if "is_admin" in data:
+        if user.id == session.get("user_id") and not data["is_admin"]:
+            return {"error": "You cannot remove your own admin rights."}, 400
+        user.is_admin = data["is_admin"]
 
-    if "password" in data:
+    if "username" in data:
+        user.username = data["username"]
+    if "email" in data:
+        user.email = data["email"]
+    if "password" in data and data["password"]:
         user.password_hash = generate_password_hash(data["password"])
+    if "is_admin" in data:
+        user.is_admin = data["is_admin"]
 
     try:
         db.session.commit()
         return user.to_dict(), 200
+    except IntegrityError:
+        db.session.rollback()
+        return {"error": "Username or email already in use."}, 409
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 400
+
 
 # -------------------------
 # DELETE USER (Admin Only)

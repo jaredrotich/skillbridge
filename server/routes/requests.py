@@ -1,10 +1,13 @@
-# server/routes/requests.py
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from models import db, SkillRequest, Skill, User
+from flask_mail import Message
 
 requests_bp = Blueprint("requests", __name__, url_prefix="/requests")
 
-# GET all skill requests
+
+# -------------------------
+# GET All Skill Requests
+# -------------------------
 @requests_bp.route("/", methods=["GET"])
 def get_requests():
     try:
@@ -14,7 +17,10 @@ def get_requests():
         print("[REQUEST FETCH ERROR]", str(e))
         return {"error": "Failed to fetch requests"}, 500
 
-# CREATE a new skill request
+
+# -------------------------
+# CREATE New Skill Request
+# -------------------------
 @requests_bp.route("/", methods=["POST"])
 def create_request():
     data = request.get_json()
@@ -44,7 +50,10 @@ def create_request():
         print("[REQUEST CREATE ERROR]", str(e))
         return {"error": "Failed to create request"}, 500
 
-# PATCH (update status and feedback)
+
+# -------------------------
+# PATCH Update Status or Feedback
+# -------------------------
 @requests_bp.route("/<int:id>", methods=["PATCH"])
 def update_request_status(id):
     request_obj = SkillRequest.query.get_or_404(id)
@@ -61,3 +70,41 @@ def update_request_status(id):
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 400
+
+
+# -------------------------
+# CLIENT REQUEST → Email Admins
+# -------------------------
+@requests_bp.route("/client-request", methods=["POST"])
+def client_request():
+    data = request.get_json()
+    name = data.get("name")
+    email = data.get("email")
+    message = data.get("message")
+
+    if not all([name, email, message]):
+        return {"error": "All fields are required."}, 400
+
+    # Fetch admin emails
+    admin_emails = [u.email for u in User.query.filter_by(is_admin=True).all()]
+    if not admin_emails:
+        return {"error": "No admin emails found."}, 404
+
+    # Send mail
+    try:
+        mail = current_app.extensions.get("mail")
+        if not mail:
+            return {"error": "Mail service not configured."}, 500
+
+        msg = Message(
+            subject="🚨 New Client Service Request",
+            sender=email,
+            recipients=admin_emails,
+            body=f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
+        )
+        mail.send(msg)
+        return {"message": "Request sent successfully."}, 200
+
+    except Exception as e:
+        print("[EMAIL ERROR]", str(e))
+        return {"error": "Failed to send email"}, 500
