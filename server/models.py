@@ -13,9 +13,8 @@ class User(db.Model):
     username = db.Column(db.String(50), nullable=False, unique=True)
     email = db.Column(db.String(100), nullable=False, unique=True)
     password_hash = db.Column(db.String, nullable=False)
-    is_admin = db.Column(db.Boolean, default=False) 
+    is_admin = db.Column(db.Boolean, default=False)
 
-    # Relationships
     skills = db.relationship('Skill', backref='user', cascade="all, delete-orphan")
     requests_made = db.relationship(
         'SkillRequest',
@@ -29,7 +28,7 @@ class User(db.Model):
             "id": self.id,
             "username": self.username,
             "email": self.email,
-            "is_admin": self.is_admin 
+            "is_admin": self.is_admin
         }
 
     def generate_reset_token(self, expires_sec=1800):
@@ -60,7 +59,6 @@ class Skill(db.Model):
     description = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-    # Reverse relationship
     requests = db.relationship('SkillRequest', backref='skill', cascade="all, delete-orphan")
 
     def to_dict(self):
@@ -80,7 +78,7 @@ class SkillRequest(db.Model):
     skill_id = db.Column(db.Integer, db.ForeignKey('skills.id'), nullable=False)
     status = db.Column(db.String(20), default="pending")
     message = db.Column(db.String(255))
-    feedback = db.Column(db.String(255)) 
+    feedback = db.Column(db.String(255))
 
     def to_dict(self):
         return {
@@ -97,3 +95,32 @@ class SkillRequest(db.Model):
         if message and len(message) > 255:
             raise ValueError("Message must be under 255 characters")
         return message
+
+
+class Request(db.Model):
+    __tablename__ = 'requests'
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String)
+    description = db.Column(db.Text)
+    budget = db.Column(db.String)
+    name = db.Column(db.String)
+    email = db.Column(db.String)
+    message = db.Column(db.Text)
+    status = db.Column(db.String, default="pending")
+    feedback = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "budget": self.budget,
+            "name": self.name,
+            "email": self.email,
+            "message": self.message,
+            "status": self.status,
+            "feedback": self.feedback,
+            "created_at": self.created_at.isoformat()
+        }

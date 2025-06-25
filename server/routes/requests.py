@@ -1,28 +1,24 @@
 from flask import Blueprint, request, jsonify, current_app
-from models import db, SkillRequest, Skill, User
+from models import db, SkillRequest, Skill, User, Request
 from flask_mail import Message
 
 requests_bp = Blueprint("requests", __name__, url_prefix="/requests")
 
 
-# -------------------------
-# GET All Skill Requests
-# -------------------------
+# === SKILL REQUESTS ===
+
 @requests_bp.route("/", methods=["GET"])
 def get_requests():
     try:
-        requests = SkillRequest.query.all()
-        return jsonify([r.to_dict() for r in requests]), 200
+        skill_requests = SkillRequest.query.all()
+        return jsonify([r.to_dict() for r in skill_requests]), 200
     except Exception as e:
         print("[REQUEST FETCH ERROR]", str(e))
         return {"error": "Failed to fetch requests"}, 500
 
 
-# -------------------------
-# CREATE New Skill Request
-# -------------------------
 @requests_bp.route("/", methods=["POST"])
-def create_request():
+def create_skill_request():
     data = request.get_json()
     requester_id = data.get("requester_id")
     skill_id = data.get("skill_id")
@@ -51,11 +47,8 @@ def create_request():
         return {"error": "Failed to create request"}, 500
 
 
-# -------------------------
-# PATCH Update Status or Feedback
-# -------------------------
 @requests_bp.route("/<int:id>", methods=["PATCH"])
-def update_request_status(id):
+def update_skill_request_status(id):
     request_obj = SkillRequest.query.get_or_404(id)
     data = request.get_json()
 
@@ -72,9 +65,8 @@ def update_request_status(id):
         return {"error": str(e)}, 400
 
 
-# -------------------------
-# CLIENT REQUEST → Email Admins
-# -------------------------
+# === CLIENT DIRECT REQUEST ===
+
 @requests_bp.route("/client-request", methods=["POST"])
 def client_request():
     data = request.get_json()
@@ -85,13 +77,22 @@ def client_request():
     if not all([name, email, message]):
         return {"error": "All fields are required."}, 400
 
-    # Fetch admin emails
-    admin_emails = [u.email for u in User.query.filter_by(is_admin=True).all()]
-    if not admin_emails:
-        return {"error": "No admin emails found."}, 404
+    # Save to DB
+    new_req = Request(
+        name=name,
+        email=email,
+        message=message,
+        status="pending"
+    )
+    db.session.add(new_req)
+    db.session.commit()
 
-    # Send mail
+    # Email Admins
     try:
+        admin_emails = [u.email for u in User.query.filter_by(is_admin=True).all()]
+        if not admin_emails:
+            return {"error": "No admin emails found."}, 404
+
         mail = current_app.extensions.get("mail")
         if not mail:
             return {"error": "Mail service not configured."}, 500
@@ -103,8 +104,40 @@ def client_request():
             body=f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
         )
         mail.send(msg)
-        return {"message": "Request sent successfully."}, 200
+        return {"message": "Request sent and saved successfully."}, 200
 
     except Exception as e:
         print("[EMAIL ERROR]", str(e))
         return {"error": "Failed to send email"}, 500
+
+
+@requests_bp.route("/requests", methods=["POST"])
+def create_generic_request():
+    data = request.get_json()
+
+    new_request = Request(
+        title=data.get("title"),
+        description=data.get("description"),
+        budget=data.get("budget"),
+        status="pending"
+    )
+    db.session.add(new_request)
+    db.session.commit()
+
+    return jsonify(new_request.to_dict()), 201
+
+
+@requests_bp.route("/requests/<int:id>", methods=["PATCH"])
+def update_generic_request(id):
+    req = Request.query.get(id)
+    if not req:
+        return jsonify({"error": "Request not found"}), 404
+
+    data = request.get_json()
+    if "status" in data:
+        req.status = data["status"]
+    if "feedback" in data:
+        req.feedback = data["feedback"]
+
+    db.session.commit()
+    return jsonify(req.to_dict()), 200
