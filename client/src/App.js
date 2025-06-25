@@ -42,7 +42,7 @@ function App() {
         <Route path="/" element={<Skills />} />
         <Route path="/new" element={<NewSkill />} />
         <Route path="/requests" element={<Requests />} />
-        <Route path="/client-request" element={<ClientRequest />} />
+        <Route path="/clientrequest" element={<ClientRequest />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/signup" element={<Signup setUser={setUser} />} />
         <Route path="/request-skill/:id" element={<RequestSkill user={user} />} />
