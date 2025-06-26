@@ -6,15 +6,28 @@ function Requests() {
   const [editing, setEditing] = useState({});
 
   useEffect(() => {
-    fetch("http://localhost:5000/requests/", {
+    // Fetch skill requests
+    const fetchSkillRequests = fetch("http://localhost:5000/requests/", {
       credentials: "include",
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        setRequests(data);
-        // initialize editing state
+    }).then((r) => r.json());
+
+    // Fetch client requests
+    const fetchClientRequests = fetch("http://localhost:5000/requests/client", {
+      credentials: "include",
+    }).then((r) => r.json());
+
+    Promise.all([fetchSkillRequests, fetchClientRequests])
+      .then(([skills, clients]) => {
+        // Add type label to each
+        const skillWithType = skills.map((r) => ({ ...r, type: "skill" }));
+        const clientWithType = clients.map((r) => ({ ...r, type: "client" }));
+        const combined = [...skillWithType, ...clientWithType];
+
+        setRequests(combined);
+
+        // Initialize editing state
         const initial = {};
-        data.forEach((req) => {
+        combined.forEach((req) => {
           initial[req.id] = {
             status: req.status,
             feedback: req.feedback || "",
@@ -34,11 +47,16 @@ function Requests() {
     }));
   };
 
-  const handleSubmit = (id) => {
-    const data = editing[id];
+  const handleSubmit = (req) => {
+    const data = editing[req.id];
     if (!data) return;
 
-    fetch(`http://localhost:5000/requests/${id}`, {
+    const endpoint =
+      req.type === "client"
+        ? `http://localhost:5000/requests/requests/${req.id}` 
+        : `http://localhost:5000/requests/${req.id}`;
+
+    fetch(endpoint, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -52,7 +70,7 @@ function Requests() {
       })
       .then((updated) => {
         setRequests((prev) =>
-          prev.map((req) => (req.id === id ? updated : req))
+          prev.map((r) => (r.id === updated.id ? { ...updated, type: req.type } : r))
         );
         alert("Changes saved ✔️");
       })
@@ -64,17 +82,33 @@ function Requests() {
 
   return (
     <div className="requests-container">
-      <h2 className="requests-heading">Skill Requests</h2>
+      <h2 className="requests-heading">All Requests</h2>
 
       {requests.length === 0 ? (
-        <p className="no-requests">No skill requests yet.</p>
+        <p className="no-requests">No requests available.</p>
       ) : (
         requests.map((r) => {
           const edit = editing[r.id];
           return (
-            <div className="request-card" key={r.id}>
-              <p><strong>Skill:</strong> {r.skill?.title}</p>
-              <p><strong>From:</strong> {r.requester?.username}</p>
+            <div className="request-card" key={`${r.type}-${r.id}`}>
+              <p>
+                <strong>Type:</strong>{" "}
+                <span style={{ color: r.type === "client" ? "purple" : "teal" }}>
+                  {r.type === "client" ? "Client Request" : "Skill Request"}
+                </span>
+              </p>
+
+              {r.type === "skill" ? (
+                <>
+                  <p><strong>Skill:</strong> {r.skill?.title}</p>
+                  <p><strong>From:</strong> {r.requester?.username}</p>
+                </>
+              ) : (
+                <>
+                  <p><strong>From:</strong> {r.name} ({r.email})</p>
+                </>
+              )}
+
               <p><strong>Message:</strong> {r.message}</p>
 
               <label><strong>Status:</strong></label>
@@ -100,7 +134,7 @@ function Requests() {
               />
 
               <button
-                onClick={() => handleSubmit(r.id)}
+                onClick={() => handleSubmit(r)}
                 style={{
                   marginTop: "0.5rem",
                   padding: "0.4rem 1rem",

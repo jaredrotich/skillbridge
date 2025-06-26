@@ -77,18 +77,21 @@ def client_request():
     if not all([name, email, message]):
         return {"error": "All fields are required."}, 400
 
-    # Save to DB
-    new_req = Request(
-        name=name,
-        email=email,
-        message=message,
-        status="pending"
-    )
-    db.session.add(new_req)
-    db.session.commit()
-
-    # Email Admins
     try:
+        # 1. Save to DB
+        new_request = Request(
+            name=name,
+            email=email,
+            message=message,
+            title="Client Request",            
+            description=message[:100],         
+            budget="Not specified",            
+            status="pending"
+        )
+        db.session.add(new_request)
+        db.session.commit()
+
+        # 2. Send Email to Admins
         admin_emails = [u.email for u in User.query.filter_by(is_admin=True).all()]
         if not admin_emails:
             return {"error": "No admin emails found."}, 404
@@ -101,14 +104,35 @@ def client_request():
             subject="🚨 New Client Service Request",
             sender=email,
             recipients=admin_emails,
-            body=f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
+            body=f"""
+New client service request received:
+
+Name: {name}
+Email: {email}
+
+Message:
+{message}
+            """
         )
         mail.send(msg)
-        return {"message": "Request sent and saved successfully."}, 200
+
+        # 3. Return saved request
+        return jsonify(new_request.to_dict()), 201
 
     except Exception as e:
-        print("[EMAIL ERROR]", str(e))
-        return {"error": "Failed to send email"}, 500
+        db.session.rollback()
+        import traceback
+        traceback.print_exc()
+        return {"error": "Failed to save and send request"}, 500
+    
+@requests_bp.route("/client", methods=["GET"])
+def get_client_requests():
+    try:
+        client_requests = Request.query.order_by(Request.created_at.desc()).all()
+        return jsonify([r.to_dict() for r in client_requests]), 200
+    except Exception as e:
+        print("[CLIENT REQUESTS FETCH ERROR]", str(e))
+        return {"error": "Failed to fetch client requests"}, 500
 
 
 @requests_bp.route("/requests", methods=["POST"])
@@ -119,6 +143,7 @@ def create_generic_request():
         title=data.get("title"),
         description=data.get("description"),
         budget=data.get("budget"),
+        type="project",
         status="pending"
     )
     db.session.add(new_request)
