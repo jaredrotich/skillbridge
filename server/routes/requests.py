@@ -59,10 +59,36 @@ def update_skill_request_status(id):
 
     try:
         db.session.commit()
+
+        #  Auto-send feedback email to requester
+        if data.get("feedback") and request_obj.requester:
+            mail = current_app.extensions.get("mail")
+            if mail:
+                msg = Message(
+                    subject="Feedback on Your Skill Request",
+                    recipients=[request_obj.requester.email],
+                    body=f"""
+Hi {request_obj.requester.username},
+
+Here is the feedback on your request for '{request_obj.skill.title}':
+
+"{request_obj.feedback}"
+
+Status: {request_obj.status}
+
+Thanks,
+SkillBridge Team
+                    """
+                )
+                mail.send(msg)
+
         return request_obj.to_dict(), 200
+
     except Exception as e:
         db.session.rollback()
         return {"error": str(e)}, 400
+
+
 
 
 # === CLIENT DIRECT REQUEST ===
@@ -176,6 +202,36 @@ def update_generic_request(id):
     if "project_link" in data:
         req.project_link = data["project_link"]
 
+    try:
+        db.session.commit()
 
-    db.session.commit()
-    return jsonify(req.to_dict()), 200
+        #  Auto-send feedback to client via email
+        if data.get("feedback") and req.email:
+            mail = current_app.extensions.get("mail")
+            if mail:
+                msg = Message(
+                    subject="Feedback on Your Service Request",
+                    recipients=[req.email],
+                    body=f"""
+Hi {req.name},
+
+Here is the feedback on your service request:
+
+"{req.feedback}"
+
+Status: {req.status}
+
+Thanks,
+SkillBridge Team
+                    """
+                )
+                mail.send(msg)
+
+        return jsonify(req.to_dict()), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 400
+
+    # db.session.commit()
+    # return jsonify(req.to_dict()), 200

@@ -1,5 +1,7 @@
+
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 
 function Navbar({ user, setUser }) {
   const navigate = useNavigate();
@@ -16,36 +18,32 @@ function Navbar({ user, setUser }) {
 
   return (
     <nav className="navbar">
-      <Link to="/">Skills</Link>
-      <Link to="/new">Post Skill</Link>
-      <Link to="/requests">Requests</Link>
-      <Link to="/clientrequest">ClientRequest</Link>
+      <div className="navbar-left">
+        <Link to="/" className="nav-link">Skills</Link>
+        <Link to="/new" className="nav-link">Post Skill</Link>
+        <Link to="/requests" className="nav-link">Requests</Link>
+        <Link to="/clientrequest" className="nav-link">ClientRequest</Link>
+        {user?.username === "admin" && (
+          <Link to="/userslist" className="nav-link">Manage Users</Link>
+        )}
+      </div>
 
-      {/*  Only show if user is logged in and is admin */}
-      {user?.username === "admin" && (
-        <Link to="/userslist" style={{ marginLeft: "1rem" }}>
-          Manage Users
-        </Link>
-      )}
-
-      {user ? (
-        <>
-          <span style={{ color: "white", marginLeft: "1rem" }}>
-            Hello, {user.username}!
-          </span>
-          <button onClick={handleLogout} style={{ marginLeft: "1rem" }}>
-            Logout
-          </button>
-        </>
-      ) : (
-        <>
-          <Link to="/login" style={{ marginLeft: "1rem" }}>Login</Link>
-          <Link to="/signup" style={{ marginLeft: "1rem" }}>Sign Up</Link>
-          <Link to="/forgot-password" style={{ marginLeft: "1rem" }}>
-            Forgot Password
-          </Link>
-        </>
-      )}
+      <div className="navbar-right">
+        {user ? (
+          <>
+            <span className="user-greeting">Hello, {user.username}!</span>
+            <button onClick={handleLogout} className="logout-button">
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login" className="nav-link">Login</Link>
+            <Link to="/signup" className="nav-link">Sign Up</Link>
+            <Link to="/forgot-password" className="nav-link">Forgot Password</Link>
+          </>
+        )}
+      </div>
     </nav>
   );
 }

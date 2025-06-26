@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
@@ -6,7 +5,10 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+
+// Components & Pages
 import Navbar from "./components/Navbar";
+import Footer from "./pages/Footer";
 import Skills from "./pages/Skills";
 import NewSkill from "./pages/NewSkill";
 import Requests from "./pages/Requests";
@@ -23,12 +25,10 @@ function App() {
 
   useEffect(() => {
     fetch("http://localhost:5000/users/check_session", {
-      credentials: "include", // Important for cookies/session
+      credentials: "include", // To include cookies/session
     })
       .then((r) => {
-        if (r.ok) {
-          return r.json();
-        }
+        if (r.ok) return r.json();
         throw new Error("Unauthorized");
       })
       .then(setUser)
@@ -38,10 +38,11 @@ function App() {
   return (
     <Router>
       <Navbar user={user} setUser={setUser} />
+
       <Routes>
         <Route path="/" element={<Skills />} />
         <Route path="/new" element={<NewSkill />} />
-        <Route path="/requests" element={<Requests />} />
+        <Route path="/requests" element={<Requests isAdmin={user?.is_admin} />} />
         <Route path="/clientrequest" element={<ClientRequest />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/signup" element={<Signup setUser={setUser} />} />
@@ -50,12 +51,12 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route
           path="/userslist"
-          element={
-            user?.username === "admin" ? <UsersList /> : <Navigate to="/" />
-          }
+          element={user?.username === "admin" ? <UsersList /> : <Navigate to="/" />}
         />
-        
       </Routes>
+
+      {/*  show footer */}
+      <Footer />
     </Router>
   );
 }
