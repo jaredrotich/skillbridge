@@ -1,4 +1,4 @@
-.requests-container {
+/* .requests-container {
   padding: 2rem;
   max-width: 700px;
   margin: 0 auto;
@@ -39,4 +39,74 @@ select {
   border-radius: 5px;
   border: 1px solid #888;
 }
+ */
 
+ .requests-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.requests-heading {
+  text-align: center;
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.no-requests {
+  text-align: center;
+  color: #777;
+}
+
+.request-card {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: 0.3s;
+  border-left: 5px solid #0077cc;
+}
+
+.request-card:hover {
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.request-card p {
+  margin: 0.3rem 0;
+  font-size: 1rem;
+}
+
+.request-card strong {
+  color: #444;
+}
+
+.request-card select,
+.request-card textarea {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.request-card button {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1.2rem;
+  background: #0077cc;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.request-card button:hover {
+  background: #005fa3;
+}

@@ -133,6 +133,16 @@ def get_client_requests():
     except Exception as e:
         print("[CLIENT REQUESTS FETCH ERROR]", str(e))
         return {"error": "Failed to fetch client requests"}, 500
+    
+@requests_bp.route("/completed", methods=["GET"])
+def get_completed_projects():
+    try:
+        completed = Request.query.filter_by(status="completed").all()
+        return jsonify([r.to_dict() for r in completed]), 200
+    except Exception as e:
+        print("[COMPLETED FETCH ERROR]", str(e))
+        return {"error": "Failed to fetch completed projects"}, 500
+
 
 
 @requests_bp.route("/requests", methods=["POST"])
@@ -163,6 +173,9 @@ def update_generic_request(id):
         req.status = data["status"]
     if "feedback" in data:
         req.feedback = data["feedback"]
+    if "project_link" in data:
+        req.project_link = data["project_link"]
+
 
     db.session.commit()
     return jsonify(req.to_dict()), 200

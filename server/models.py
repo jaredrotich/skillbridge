@@ -110,6 +110,8 @@ class Request(db.Model):
     status = db.Column(db.String, default="pending")
     feedback = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    project_link = db.Column(db.String)
+
 
     def to_dict(self):
         return {
@@ -122,5 +124,7 @@ class Request(db.Model):
             "message": self.message,
             "status": self.status,
             "feedback": self.feedback,
-            "created_at": self.created_at.isoformat()
+            "created_at": self.created_at.isoformat(),
+            "project_link": self.project_link
+
         }

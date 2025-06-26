@@ -6,31 +6,28 @@ function Requests() {
   const [editing, setEditing] = useState({});
 
   useEffect(() => {
-    // Fetch skill requests
     const fetchSkillRequests = fetch("http://localhost:5000/requests/", {
       credentials: "include",
     }).then((r) => r.json());
 
-    // Fetch client requests
     const fetchClientRequests = fetch("http://localhost:5000/requests/client", {
       credentials: "include",
     }).then((r) => r.json());
 
     Promise.all([fetchSkillRequests, fetchClientRequests])
       .then(([skills, clients]) => {
-        // Add type label to each
         const skillWithType = skills.map((r) => ({ ...r, type: "skill" }));
         const clientWithType = clients.map((r) => ({ ...r, type: "client" }));
         const combined = [...skillWithType, ...clientWithType];
 
         setRequests(combined);
 
-        // Initialize editing state
         const initial = {};
         combined.forEach((req) => {
           initial[req.id] = {
             status: req.status,
             feedback: req.feedback || "",
+            project_link: req.project_link || "",
           };
         });
         setEditing(initial);
@@ -53,7 +50,7 @@ function Requests() {
 
     const endpoint =
       req.type === "client"
-        ? `http://localhost:5000/requests/requests/${req.id}` 
+        ? `http://localhost:5000/requests/requests/${req.id}`
         : `http://localhost:5000/requests/${req.id}`;
 
     fetch(endpoint, {
@@ -132,6 +129,25 @@ function Requests() {
                   handleFieldChange(r.id, "feedback", e.target.value)
                 }
               />
+
+              {edit?.status === "completed" && (
+                <>
+                  <label><strong>Project Link (optional):</strong></label>
+                  <input
+                    type="url"
+                    placeholder="https://example.com/project"
+                    value={edit.project_link || ""}
+                    onChange={(e) =>
+                      handleFieldChange(r.id, "project_link", e.target.value)
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "0.4rem",
+                      marginBottom: "0.5rem",
+                    }}
+                  />
+                </>
+              )}
 
               <button
                 onClick={() => handleSubmit(r)}
