@@ -1,0 +1,53 @@
+.home {
+  font-family: 'Segoe UI', sans-serif;
+  line-height: 1.6;
+}
+
+.hero {
+  position: relative;
+  text-align: center;
+  color: white;
+}
+
+.hero-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  filter: brightness(0.4);
+}
+
+.hero-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.hero-text h1 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.cta-button {
+  background-color: #00c4ff;
+  color: white;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.about, .skills, .why-us, .cta {
+  padding: 2rem;
+  max-width: 800px;
+  margin: auto;
+}
+
+.skills ul, .why-us ul {
+  padding-left: 1.2rem;
+}
+
+.skills li, .why-us li {
+  margin-bottom: 0.6rem;
+}

@@ -19,6 +19,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import UsersList from "./pages/UsersList";
 import ClientRequest from "./pages/ClientRequest";
+import Home from "./pages/Home";
+
 
 function App() {
   const [user, setUser] = useState(null);
@@ -40,7 +42,8 @@ function App() {
       <Navbar user={user} setUser={setUser} />
 
       <Routes>
-        <Route path="/" element={<Skills />} />
+         <Route path="/" element={<Home />} />
+        <Route path="availableskills" element={<Skills />} />
         <Route path="/new" element={<NewSkill />} />
         <Route path="/requests" element={<Requests isAdmin={user?.is_admin} />} />
         <Route path="/clientrequest" element={<ClientRequest />} />
@@ -49,6 +52,8 @@ function App() {
         <Route path="/request-skill/:id" element={<RequestSkill user={user} />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+       
+
         <Route
           path="/userslist"
           element={user?.username === "admin" ? <UsersList /> : <Navigate to="/" />}
@@ -62,3 +67,5 @@ function App() {
 }
 
 export default App;
+
+
