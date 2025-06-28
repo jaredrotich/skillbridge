@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 
-// Components & Pages
+
 import Navbar from "./components/Navbar";
 import Footer from "./pages/Footer";
 import Skills from "./pages/Skills";
@@ -27,7 +27,7 @@ function App() {
 
   useEffect(() => {
     fetch("http://localhost:5000/users/check_session", {
-      credentials: "include", // To include cookies/session
+      credentials: "include", 
     })
       .then((r) => {
         if (r.ok) return r.json();
@@ -60,7 +60,7 @@ function App() {
         />
       </Routes>
 
-      {/*  show footer */}
+      {/*   */}
       <Footer />
     </Router>
   );

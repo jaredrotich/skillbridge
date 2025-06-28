@@ -25,18 +25,18 @@ def create_app():
     app.config.from_object(Config)
     app.secret_key = "!<POTUS>"
 
-    # Init extensions
+   
     db.init_app(app)
     migrate.init_app(app, db)
     mail.init_app(app)
     CORS(app, supports_credentials=True)
 
-    # Register routes
+   
     app.register_blueprint(skills_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(requests_bp)
 
-    # Test endpoints
+   
     @app.route('/users')
     def get_users():
         users = User.query.all()
@@ -48,7 +48,7 @@ def create_app():
 
     return app
 
-# Run app
+
 if __name__ == "__main__":
     app = create_app()
     app.run(debug=True)

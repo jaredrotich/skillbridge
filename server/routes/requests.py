@@ -5,7 +5,7 @@ from flask_mail import Message
 requests_bp = Blueprint("requests", __name__, url_prefix="/requests")
 
 
-# === SKILL REQUESTS ===
+#  SKILL REQUESTS 
 
 @requests_bp.route("/", methods=["GET"])
 def get_requests():
@@ -91,7 +91,7 @@ SkillBridge Team
 
 
 
-# === CLIENT DIRECT REQUEST ===
+#  CLIENT DIRECT REQUEST
 
 @requests_bp.route("/client-request", methods=["POST"])
 def client_request():
@@ -104,7 +104,7 @@ def client_request():
         return {"error": "All fields are required."}, 400
 
     try:
-        # 1. Save to DB
+     
         new_request = Request(
             name=name,
             email=email,
@@ -127,7 +127,7 @@ def client_request():
             return {"error": "Mail service not configured."}, 500
 
         msg = Message(
-            subject="🚨 New Client Service Request",
+            subject=" New Client Service Request",
             sender=email,
             recipients=admin_emails,
             body=f"""

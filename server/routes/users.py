@@ -6,9 +6,9 @@ from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 users_bp = Blueprint("users", __name__, url_prefix="/users")
 
-# -------------------------
-# HELPER: Admin Check
-# -------------------------
+
+#  Admin Check
+
 def is_admin():
     user_id = session.get("user_id")
     if not user_id:
@@ -16,9 +16,9 @@ def is_admin():
     user = User.query.get(user_id)
     return user and user.is_admin
 
-# -------------------------
-# GET All Users (Admin Only)
-# -------------------------
+
+# GET All Users 
+
 @users_bp.route("/", methods=["GET"])
 def get_users():
     if not is_admin():
@@ -27,9 +27,9 @@ def get_users():
     users = User.query.all()
     return jsonify([user.to_dict() for user in users]), 200
 
-# -------------------------
-# LOGIN
-# -------------------------
+
+
+
 @users_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
@@ -41,9 +41,9 @@ def login():
 
     return {"error": "Invalid credentials"}, 401
 
-# -------------------------
-# SIGNUP
-# -------------------------
+
+
+
 @users_bp.route("/signup", methods=["POST"])
 def signup():
     data = request.get_json()
@@ -71,9 +71,9 @@ def signup():
         print(f"[SIGNUP ERROR] {str(e)}")
         return {"error": f"Signup failed. Reason: {str(e)}"}, 500
 
-# -------------------------
+
 # CHECK SESSION
-# -------------------------
+
 @users_bp.route("/check_session", methods=["GET"])
 def check_session():
     user_id = session.get("user_id")
@@ -83,17 +83,16 @@ def check_session():
             return user.to_dict(), 200
     return {"error": "Unauthorized"}, 401
 
-# -------------------------
-# LOGOUT
-# -------------------------
+
+
 @users_bp.route("/logout", methods=["DELETE"])
 def logout():
     session.pop("user_id", None)
     return {"message": "Logged out successfully"}, 200
 
-# -------------------------
-# HELPER: Generate & Verify Token
-# -------------------------
+
+#  Generate & Verify Token
+
 def generate_reset_token(email):
     s = URLSafeTimedSerializer(current_app.config["SECRET_KEY"])
     return s.dumps(email, salt="password-reset")
@@ -106,9 +105,8 @@ def verify_reset_token(token, expiration=3600):
     except (BadSignature, SignatureExpired):
         return None
 
-# -------------------------
-# FORGOT PASSWORD
-# -------------------------
+
+
 @users_bp.route("/forgot_password", methods=["POST"])
 def forgot_password():
     data = request.get_json()
@@ -120,13 +118,13 @@ def forgot_password():
 
     token = generate_reset_token(email)
     reset_link = f"http://localhost:3000/reset-password/{token}"
-    print(f"[RESET LINK] {reset_link}")  # TODO: Send this via email in production
+    print(f"[RESET LINK] {reset_link}")  # TODO: 
 
     return {"message": "Reset link generated", "reset_link": reset_link}, 200
 
-# -------------------------
+
 # RESET PASSWORD
-# -------------------------
+
 @users_bp.route("/reset_password/<token>", methods=["POST"])
 def reset_password(token):
     user = verify_reset_token(token)
@@ -143,19 +141,19 @@ def reset_password(token):
     db.session.commit()
     return {"message": "Password has been reset"}, 200
 
-# -------------------------
+
 # UPDATE USER
-# -------------------------
+
 @users_bp.route("/<int:id>", methods=["PATCH"])
 def update_user(id):
-    # Only admins can update any user
+   
     if not is_admin():
         return {"error": "Unauthorized. Admins only."}, 403
 
     user = User.query.get_or_404(id)
     data = request.get_json()
 
-    #  username, email, password, is_admin
+   
     if "is_admin" in data:
         if user.id == session.get("user_id") and not data["is_admin"]:
             return {"error": "You cannot remove your own admin rights."}, 400
@@ -181,9 +179,9 @@ def update_user(id):
         return {"error": str(e)}, 400
 
 
-# -------------------------
-# DELETE USER (Admin Only)
-# -------------------------
+
+
+
 @users_bp.route("/<int:id>", methods=["DELETE"])
 def delete_user(id):
     if not is_admin():
