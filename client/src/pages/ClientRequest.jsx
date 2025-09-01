@@ -9,7 +9,7 @@ function ClientRequest() {
     message: "",
   });
 
-  const [status, setStatus] = useState("idle"); // idle | loading | success | error
+  const [status, setStatus] = useState("idle"); 
   const [error, setError] = useState("");
 
   function handleChange(e) {
